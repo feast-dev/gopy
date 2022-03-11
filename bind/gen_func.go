@@ -245,6 +245,9 @@ func (g *pyGen) genFuncBody(sym *symbol, fsym *Func) {
 	g.gofile.Printf(" {\n")
 	g.gofile.Indent()
 	if fsym.hasfun {
+		g.gofile.Printf("_saved_thread := C.PyEval_SaveThread()\n")
+		g.gofile.Printf("defer C.PyEval_RestoreThread(_saved_thread)\n")
+
 		for i, arg := range args {
 			if arg.sym.isSignature() {
 				g.gofile.Printf("_fun_arg := %s\n", pySafeArg(arg.Name(), i))
