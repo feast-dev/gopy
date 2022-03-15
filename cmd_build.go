@@ -174,6 +174,8 @@ func runBuild(mode bind.BuildMode, cfg *BuildCfg) error {
 			// -s Omit the symbol table and debug information
 			// -w Omit the DWARF symbol table
 			args = append(args, "-ldflags=-s -w")
+		} else {
+			args = append(args, "-gcflags=all=\"-N -l\"")
 		}
 		args = append(args, "-o", buildLib, ".")
 		fmt.Printf("go %v\n", strings.Join(args, " "))
