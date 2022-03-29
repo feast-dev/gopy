@@ -583,12 +583,18 @@ func (g *pyGen) genGoPreamble() {
 		if err != nil {
 			panic(err)
 		}
+		var ldflags string
+		if g.mode == ModeExe {
+			ldflags = pycfg.LdFlags
+		} else {
+			ldflags = pycfg.LdSharedFlags
+		}
 		// this is critical to avoid pybindgen errors:
 		exflags := " -Wno-error -Wno-implicit-function-declaration -Wno-int-conversion"
 		pkgcfg := fmt.Sprintf(`
 #cgo CFLAGS: %s
 #cgo LDFLAGS: %s
-`, pycfg.CFlags+exflags, pycfg.LdFlags)
+`, pycfg.CFlags+exflags, ldflags)
 
 		return pkgcfg
 	}()

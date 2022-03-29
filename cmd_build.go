@@ -215,7 +215,7 @@ func runBuild(mode bind.BuildMode, cfg *BuildCfg) error {
 			cflags = append(cflags, "-I"+filepath.ToSlash(include))
 		}
 
-		ldflags := strings.Fields(strings.TrimSpace(pycfg.LdFlags))
+		ldflags := strings.Fields(strings.TrimSpace(pycfg.LdSharedFlags))
 		if !cfg.Symbols {
 			ldflags = append(ldflags, "-s")
 		}
