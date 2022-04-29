@@ -244,10 +244,8 @@ func (g *pyGen) genFuncBody(sym *symbol, fsym *Func) {
 
 	g.gofile.Printf(" {\n")
 	g.gofile.Indent()
-	if fsym.hasfun {
-		g.gofile.Printf("_saved_thread := C.PyEval_SaveThread()\n")
-		g.gofile.Printf("defer C.PyEval_RestoreThread(_saved_thread)\n")
 
+	if fsym.hasfun {
 		for i, arg := range args {
 			if arg.sym.isSignature() {
 				g.gofile.Printf("_fun_arg := %s\n", pySafeArg(arg.Name(), i))
@@ -331,6 +329,13 @@ if __err != nil {
 		}
 	}
 
+	// release GIL
+	g.gofile.Printf("_saved_thread := C.PyEval_SaveThread()\n")
+	if !rvIsErr && nres != 2 {
+		// reacquire GIL after return
+		g.gofile.Printf("defer C.PyEval_RestoreThread(_saved_thread)\n")
+	}
+
 	hasRetCvt := false
 	hasAddrOfTmp := false
 	if nres > 0 {
@@ -389,6 +394,9 @@ if __err != nil {
 
 	if rvIsErr || nres == 2 {
 		g.gofile.Printf("\n")
+		// reacquire GIL
+		g.gofile.Printf("C.PyEval_RestoreThread(_saved_thread)\n")
+
 		g.gofile.Printf("if __err != nil {\n")
 		g.gofile.Indent()
 		g.gofile.Printf("estr := C.CString(__err.Error())\n")
